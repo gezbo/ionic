@@ -162,7 +162,7 @@ export class Slides {
    */
   @Method()
   slideNext(speed?: number, runCallbacks?: boolean) {
-    this.swiper.slideNext(runCallbacks, speed);
+    this.swiper.slideNext(speed, runCallbacks);
   }
 
   /**
@@ -170,7 +170,7 @@ export class Slides {
    */
   @Method()
   slidePrev(speed?: number, runCallbacks?: boolean) {
-    this.swiper.slidePrev(runCallbacks, speed);
+    this.swiper.slidePrev(speed, runCallbacks);
   }
 
   /**
@@ -202,7 +202,7 @@ export class Slides {
    *
    */
   @Method()
-  isEnd(): Promise<ConstrainBoolean> {
+  isEnd(): Promise<boolean> {
     return Promise.resolve(this.swiper.isEnd);
   }
 
@@ -396,12 +396,12 @@ export class Slides {
 
   render() {
     return (
-      <div class="swiper-container" ref={el => this.container = el as HTMLElement }>
+      <div class="swiper-container" ref={el => this.container = el as HTMLElement}>
         <div class="swiper-wrapper">
           <slot></slot>
         </div>
-        { this.pager ? <div class="swiper-pagination"></div> : null }
-        { this.scrollbar ? <div class="swiper-scrollbar"></div> : null }
+        {this.pager ? <div class="swiper-pagination"></div> : null}
+        {this.scrollbar ? <div class="swiper-scrollbar"></div> : null}
       </div>
     );
   }

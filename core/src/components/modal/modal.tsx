@@ -127,12 +127,12 @@ export class Modal implements OverlayInterface {
     ev.stopPropagation();
     ev.preventDefault();
 
-    this.dismiss();
+    return this.dismiss();
   }
 
   @Listen('ionBackdropTap')
   protected onBackdropTap() {
-    this.dismiss(null, BACKDROP);
+    return this.dismiss(null, BACKDROP);
   }
 
   @Listen('ionModalDidPresent')
@@ -177,14 +177,17 @@ export class Modal implements OverlayInterface {
    * Dismiss the modal overlay after it has been presented.
    */
   @Method()
-  async dismiss(data?: any, role?: string): Promise<void> {
-    await dismiss(this, data, role, 'modalLeave', iosLeaveAnimation, mdLeaveAnimation);
-    await detachComponent(this.delegate, this.usersElement);
+  async dismiss(data?: any, role?: string): Promise<boolean> {
+    const dismissed = await dismiss(this, data, role, 'modalLeave', iosLeaveAnimation, mdLeaveAnimation);
+    if (dismissed) {
+      await detachComponent(this.delegate, this.usersElement);
+    }
+    return dismissed;
   }
 
   /**
    * Returns a promise that resolves when the modal did dismiss. It also accepts a callback
-   * that is called in the same circustances.
+   * that is called in the same circumstances.
    *
    */
   @Method()
@@ -194,7 +197,7 @@ export class Modal implements OverlayInterface {
 
   /**
    * Returns a promise that resolves when the modal will dismiss. It also accepts a callback
-   * that is called in the same circustances.
+   * that is called in the same circumstances.
    *
    */
   @Method()

@@ -27,6 +27,7 @@ import {
   ItemRenderFn,
   LoadingOptions,
   MenuChangeEventDetail,
+  MenuControllerI,
   MenuI,
   ModalOptions,
   Mode,
@@ -75,7 +76,7 @@ export namespace Components {
     /**
     * Dismiss the open action sheet overlay.
     */
-    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<boolean>;
     /**
     * Get the most recently opened action sheet overlay.
     */
@@ -95,7 +96,7 @@ export namespace Components {
     /**
     * An array of buttons for the action sheet.
     */
-    'buttons': ActionSheetButton[];
+    'buttons': (ActionSheetButton | string)[];
     /**
     * Additional classes to apply for custom CSS. If multiple classes are provided they should be separated by spaces.
     */
@@ -103,7 +104,7 @@ export namespace Components {
     /**
     * Dismiss the action sheet overlay after it has been presented.
     */
-    'dismiss': (data?: any, role?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined) => Promise<boolean>;
     /**
     * Animation to use when the action sheet is presented.
     */
@@ -158,7 +159,7 @@ export namespace Components {
     /**
     * An array of buttons for the action sheet.
     */
-    'buttons'?: ActionSheetButton[];
+    'buttons'?: (ActionSheetButton | string)[];
     /**
     * Additional classes to apply for custom CSS. If multiple classes are provided they should be separated by spaces.
     */
@@ -226,7 +227,7 @@ export namespace Components {
     /**
     * Dismiss the open alert overlay.
     */
-    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<boolean>;
     /**
     * Get the most recently opened alert overlay.
     */
@@ -254,7 +255,7 @@ export namespace Components {
     /**
     * Dismiss the alert overlay after it has been presented.
     */
-    'dismiss': (data?: any, role?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined) => Promise<boolean>;
     /**
     * Animation to use when the alert is presented.
     */
@@ -1147,7 +1148,7 @@ export namespace Components {
     /**
     * Scroll to a specified X/Y location in the component
     */
-    'scrollToPoint': (x: number | undefined, y: number | undefined, duration?: number) => Promise<void>;
+    'scrollToPoint': (x: number | null | undefined, y: number | null | undefined, duration?: number) => Promise<void>;
     /**
     * Scroll to the top of the component
     */
@@ -1239,9 +1240,13 @@ export namespace Components {
     */
     'min': string;
     /**
-    * Values used to create the list of selectable minutes. By default the mintues range from `0` to `59`. However, to control exactly which minutes to display, the `minuteValues` input can take a number, an array of numbers, or a string of comma separated numbers. For example, if the minute selections should only be every 15 minutes, then this input value would be `minuteValues="0,15,30,45"`.
+    * Values used to create the list of selectable minutes. By default the minutes range from `0` to `59`. However, to control exactly which minutes to display, the `minuteValues` input can take a number, an array of numbers, or a string of comma separated numbers. For example, if the minute selections should only be every 15 minutes, then this input value would be `minuteValues="0,15,30,45"`.
     */
     'minuteValues': number[] | number | string;
+    /**
+    * The mode determines which platform styles to use. Possible values are: `"ios"` or `"md"`.
+    */
+    'mode': Mode;
     /**
     * Full names for each month name. This can be used to provide locale month names. Defaults to English.
     */
@@ -1318,9 +1323,13 @@ export namespace Components {
     */
     'min'?: string;
     /**
-    * Values used to create the list of selectable minutes. By default the mintues range from `0` to `59`. However, to control exactly which minutes to display, the `minuteValues` input can take a number, an array of numbers, or a string of comma separated numbers. For example, if the minute selections should only be every 15 minutes, then this input value would be `minuteValues="0,15,30,45"`.
+    * Values used to create the list of selectable minutes. By default the minutes range from `0` to `59`. However, to control exactly which minutes to display, the `minuteValues` input can take a number, an array of numbers, or a string of comma separated numbers. For example, if the minute selections should only be every 15 minutes, then this input value would be `minuteValues="0,15,30,45"`.
     */
     'minuteValues'?: number[] | number | string;
+    /**
+    * The mode determines which platform styles to use. Possible values are: `"ios"` or `"md"`.
+    */
+    'mode'?: Mode;
     /**
     * Full names for each month name. This can be used to provide locale month names. Defaults to English.
     */
@@ -2195,6 +2204,7 @@ export namespace Components {
   }
 
   interface IonList {
+    'closeSlidingItems': () => Promise<boolean>;
     /**
     * If true, the list will have margin around it and rounded corners. Defaults to `false`.
     */
@@ -2203,6 +2213,10 @@ export namespace Components {
     * How the bottom border should be displayed on all items. Available options: `"full"`, `"inset"`, `"none"`.
     */
     'lines': 'full' | 'inset' | 'none';
+    /**
+    * The mode determines which platform styles to use. Possible values are: `"ios"` or `"md"`.
+    */
+    'mode': Mode;
   }
   interface IonListAttributes extends StencilHTMLAttributes {
     /**
@@ -2213,6 +2227,10 @@ export namespace Components {
     * How the bottom border should be displayed on all items. Available options: `"full"`, `"inset"`, `"none"`.
     */
     'lines'?: 'full' | 'inset' | 'none';
+    /**
+    * The mode determines which platform styles to use. Possible values are: `"ios"` or `"md"`.
+    */
+    'mode'?: Mode;
   }
 
   interface IonLoadingController {
@@ -2223,7 +2241,7 @@ export namespace Components {
     /**
     * Dismiss the open loading overlay.
     */
-    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<boolean>;
     /**
     * Get the most recently opened loading overlay.
     */
@@ -2247,7 +2265,7 @@ export namespace Components {
     /**
     * Dismiss the loading overlay after it has been presented.
     */
-    'dismiss': (data?: any, role?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined) => Promise<boolean>;
     /**
     * Number of milliseconds to wait before dismissing the loading indicator.
     */
@@ -2412,6 +2430,8 @@ export namespace Components {
   }
 
   interface IonMenuController {
+    '_createAnimation': (type: string, menuCmp: MenuI) => Promise<Animation>;
+    '_getInstance': () => Promise<MenuControllerI>;
     '_register': (menu: MenuI) => void;
     '_setActiveMenu': (menu: MenuI) => void;
     '_setOpen': (menu: MenuI, shouldOpen: boolean, animated: boolean) => Promise<boolean>;
@@ -2419,16 +2439,15 @@ export namespace Components {
     /**
     * Close the menu. If no menu is specified, then it will close any menu that is open. If a menu is specified, it will close that menu.
     */
-    'close': (menuId?: string | undefined) => Promise<boolean>;
-    'createAnimation': (type: string, menuCmp: MenuI) => Promise<Animation>;
+    'close': (menuId?: string | null | undefined) => Promise<boolean>;
     /**
     * Used to enable or disable a menu. For example, there could be multiple left menus, but only one of them should be able to be opened at the same time. If there are multiple menus on the same side, then enabling one menu will also automatically disable all the others that are on the same side.
     */
-    'enable': (shouldEnable: boolean, menuId?: string | undefined) => Promise<HTMLIonMenuElement | null>;
+    'enable': (shouldEnable: boolean, menuId?: string | null | undefined) => Promise<HTMLIonMenuElement | undefined>;
     /**
     * Used to get a menu instance. If a menu is not provided then it will return the first menu found. If the specified menu is `left` or `right`, then it will return the enabled menu on that side. Otherwise, it will try to find the menu using the menu's `id` property. If a menu is not found then it will return `null`.
     */
-    'get': (menuId?: string | undefined) => Promise<HTMLIonMenuElement | null>;
+    'get': (menuId?: string | null | undefined) => Promise<HTMLIonMenuElement | undefined>;
     /**
     * Returns an array of all menu instances.
     */
@@ -2436,7 +2455,7 @@ export namespace Components {
     /**
     * Returns the instance of the menu already opened, otherwise `null`.
     */
-    'getOpen': () => Promise<HTMLIonMenuElement | null>;
+    'getOpen': () => Promise<HTMLIonMenuElement | undefined>;
     /**
     * Returns true if any menu is currently animating.
     */
@@ -2444,24 +2463,23 @@ export namespace Components {
     /**
     * Returns true if the specified menu is enabled.
     */
-    'isEnabled': (menuId?: string | undefined) => Promise<boolean>;
+    'isEnabled': (menuId?: string | null | undefined) => Promise<boolean>;
     /**
     * Returns true if the specified menu is open. If the menu is not specified, it will return true if any menu is currently open.
     */
-    'isOpen': (menuId?: string | undefined) => Promise<boolean>;
+    'isOpen': (menuId?: string | null | undefined) => Promise<boolean>;
     /**
     * Open the menu.
     */
-    'open': (menuId?: string | undefined) => Promise<boolean>;
-    'registerAnimation': (name: string, animation: AnimationBuilder) => void;
+    'open': (menuId?: string | null | undefined) => Promise<boolean>;
     /**
     * Used to enable or disable the ability to swipe open the menu.
     */
-    'swipeGesture': (shouldEnable: boolean, menuId?: string | undefined) => Promise<HTMLIonMenuElement | null>;
+    'swipeGesture': (shouldEnable: boolean, menuId?: string | null | undefined) => Promise<HTMLIonMenuElement | undefined>;
     /**
     * Toggle the menu. If it's closed, it will open, and if opened, it will close.
     */
-    'toggle': (menuId?: string | undefined) => Promise<boolean>;
+    'toggle': (menuId?: string | null | undefined) => Promise<boolean>;
   }
   interface IonMenuControllerAttributes extends StencilHTMLAttributes {}
 
@@ -2573,7 +2591,7 @@ export namespace Components {
     /**
     * Dismiss the open modal overlay.
     */
-    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<boolean>;
     /**
     * Get the most recently opened modal overlay.
     */
@@ -2606,7 +2624,7 @@ export namespace Components {
     /**
     * Dismiss the modal overlay after it has been presented.
     */
-    'dismiss': (data?: any, role?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined) => Promise<boolean>;
     /**
     * Animation to use when the modal is presented.
     */
@@ -2624,11 +2642,11 @@ export namespace Components {
     */
     'mode': Mode;
     /**
-    * Returns a promise that resolves when the modal did dismiss. It also accepts a callback that is called in the same circustances.
+    * Returns a promise that resolves when the modal did dismiss. It also accepts a callback that is called in the same circumstances.
     */
     'onDidDismiss': () => Promise<OverlayEventDetail<any>>;
     /**
-    * Returns a promise that resolves when the modal will dismiss. It also accepts a callback that is called in the same circustances.
+    * Returns a promise that resolves when the modal will dismiss. It also accepts a callback that is called in the same circumstances.
     */
     'onWillDismiss': () => Promise<OverlayEventDetail<any>>;
     'overlayIndex': number;
@@ -2822,7 +2840,7 @@ export namespace Components {
     * Set the root for the current navigation stack.
     */
     'setRoot': <T extends NavComponent>(component: T, componentProps?: ComponentProps<T> | null | undefined, opts?: NavOptions | null | undefined, done?: TransitionDoneFn | undefined) => Promise<boolean>;
-    'setRouteId': (id: string, params: any, direction: number) => Promise<RouteWrite>;
+    'setRouteId': (id: string, params: { [key: string]: any; } | undefined, direction: number) => Promise<RouteWrite>;
     /**
     * If the nav component should allow for swipe-to-go-back
     */
@@ -2890,7 +2908,7 @@ export namespace Components {
 
   interface IonPickerController {
     'create': (opts: PickerOptions) => Promise<HTMLIonPickerElement>;
-    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<boolean>;
     'getTop': () => Promise<HTMLIonPickerElement | undefined>;
   }
   interface IonPickerControllerAttributes extends StencilHTMLAttributes {}
@@ -2919,7 +2937,7 @@ export namespace Components {
     /**
     * Dismiss the picker overlay after it has been presented.
     */
-    'dismiss': (data?: any, role?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined) => Promise<boolean>;
     /**
     * Number of milliseconds to wait before dismissing the picker.
     */
@@ -2949,7 +2967,7 @@ export namespace Components {
     */
     'onDidDismiss': () => Promise<OverlayEventDetail<any>>;
     /**
-    * Returns a promise that resolves when the picker will dismiss. It also accepts a callback that is called in the same circustances.
+    * Returns a promise that resolves when the picker will dismiss. It also accepts a callback that is called in the same circumstances.
     */
     'onWillDismiss': () => Promise<OverlayEventDetail<any>>;
     'overlayIndex': number;
@@ -3042,7 +3060,7 @@ export namespace Components {
     /**
     * Dismiss the open popover overlay.
     */
-    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<boolean>;
     /**
     * Get the most recently opened popover overlay.
     */
@@ -3075,7 +3093,7 @@ export namespace Components {
     /**
     * Dismiss the popover overlay after it has been presented.
     */
-    'dismiss': (data?: any, role?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined) => Promise<boolean>;
     /**
     * Animation to use when the popover is presented.
     */
@@ -3205,7 +3223,7 @@ export namespace Components {
     /**
     * the value of the radio group.
     */
-    'value': any;
+    'value': any | null;
   }
   interface IonRadioGroupAttributes extends StencilHTMLAttributes {
     'allowEmptySelection'?: boolean;
@@ -3221,7 +3239,7 @@ export namespace Components {
     /**
     * the value of the radio group.
     */
-    'value'?: any;
+    'value'?: any | null;
   }
 
   interface IonRadio {
@@ -3245,7 +3263,7 @@ export namespace Components {
     /**
     * the value of the radio.
     */
-    'value': any;
+    'value': any | null;
   }
   interface IonRadioAttributes extends StencilHTMLAttributes {
     /**
@@ -3292,7 +3310,7 @@ export namespace Components {
     /**
     * the value of the radio.
     */
-    'value'?: any;
+    'value'?: any | null;
   }
 
   interface IonRange {
@@ -3608,7 +3626,7 @@ export namespace Components {
     * Set the root component for the given navigation stack
     */
     'setRoot': (component: ComponentRef, params?: { [key: string]: any; } | undefined, opts?: RouterOutletOptions | undefined) => Promise<boolean>;
-    'setRouteId': (id: string, params: any, direction: number) => Promise<RouteWrite>;
+    'setRouteId': (id: string, params: { [key: string]: any; } | undefined, direction: number) => Promise<RouteWrite>;
   }
   interface IonRouterOutletAttributes extends StencilHTMLAttributes {
     'animated'?: boolean;
@@ -3863,7 +3881,7 @@ export namespace Components {
     /**
     * the value of the segment.
     */
-    'value': string;
+    'value': string | null;
   }
   interface IonSegmentAttributes extends StencilHTMLAttributes {
     /**
@@ -3882,7 +3900,7 @@ export namespace Components {
     /**
     * the value of the segment.
     */
-    'value'?: string;
+    'value'?: string | null;
   }
 
   interface IonSelectOption {
@@ -4004,7 +4022,7 @@ export namespace Components {
     /**
     * the value of the select.
     */
-    'value': any;
+    'value': any | null;
   }
   interface IonSelectAttributes extends StencilHTMLAttributes {
     /**
@@ -4070,7 +4088,7 @@ export namespace Components {
     /**
     * the value of the select.
     */
-    'value'?: any;
+    'value'?: any | null;
   }
 
   interface IonShowWhen {
@@ -4158,7 +4176,7 @@ export namespace Components {
     /**
     * Get whether or not the current slide is the last slide.
     */
-    'isEnd': () => Promise<ConstrainBoolean>;
+    'isEnd': () => Promise<boolean>;
     /**
     * Get the total number of slides.
     */
@@ -4861,7 +4879,7 @@ export namespace Components {
     /**
     * Dismiss the open toast overlay.
     */
-    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined, id?: string | undefined) => Promise<boolean>;
     /**
     * Get the most recently opened toast overlay.
     */
@@ -4885,7 +4903,7 @@ export namespace Components {
     /**
     * Dismiss the toast overlay after it has been presented.
     */
-    'dismiss': (data?: any, role?: string | undefined) => Promise<void>;
+    'dismiss': (data?: any, role?: string | undefined) => Promise<boolean>;
     /**
     * How many milliseconds to wait before hiding the toast. By default, it will show until `dismiss()` is called.
     */
