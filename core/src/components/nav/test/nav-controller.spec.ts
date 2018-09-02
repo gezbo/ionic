@@ -1,4 +1,4 @@
-import { TestWindow } from '@stencil/core/dist/testing';
+import { MockWindow } from '@stencil/core/testing';
 
 import { Config } from '../../../global/config';
 import { AnimationControllerImpl } from '../../animation-controller/animation-controller';
@@ -901,7 +901,7 @@ describe('NavController', () => {
 
   beforeEach(async () => {
     trnsDone = jest.fn();
-    win = new TestWindow();
+    win = new MockWindow() as any;
     nav = mockNavController();
   });
 
