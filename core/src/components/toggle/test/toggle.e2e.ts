@@ -18,10 +18,10 @@ describe('toggle', () => {
     // set checked
     await toggle.setProperty('checked', true);
 
+    await page.waitForChanges();
+
     const checkedValue = await toggle.getProperty('checked');
     expect(checkedValue).toBe(true);
-
-    await page.waitForQueue();
 
     // toggle should be checked
     expect(toggle).toHaveClass('toggle-checked');
