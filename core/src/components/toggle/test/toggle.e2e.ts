@@ -3,46 +3,67 @@ import { newE2EPage } from '@stencil/core/testing';
 describe('toggle', () => {
 
   it('should create standalone', async () => {
-    const page = await newE2EPage({ html: `
-      <ion-toggle class="some-class"></ion-toggle>
-    `});
+    // create a new e2e test page
+    const page = await newE2EPage();
 
+    // set the page content
+    await page.setContent(`
+      <ion-toggle class="some-class"></ion-toggle>
+    `);
+
+    // add an event spy to the page
+    const ionChange = await page.spyOnEvent('ionChange');
+
+    // find the elemnt in the page
     const toggle = await page.find('ion-toggle');
 
+    // check it has the expected css classes
     expect(toggle).toHaveClass('some-class');
     expect(toggle).toHaveClass('hydrated');
+
+    // toggle should not have checked css
+    expect(toggle).not.toHaveClass('toggle-checked');
+
+    // set checked property
+    await toggle.setProperty('checked', true);
+
+    // wait for the changes to apply
+    await page.waitForChanges();
+
+    // make sure the property was updated
+    const checkedValue1 = await toggle.getProperty('checked');
+    expect(checkedValue1).toBe(true);
+
+    // toggle should have checked css
+    expect(toggle).toHaveClass('toggle-checked');
+
+    // make sure we received the correct event detail
+    expect(ionChange).toHaveReceivedEventDetail({
+      checked: true,
+      value: 'on'
+    });
+
+    // set unchecked
+    await toggle.setProperty('checked', false);
+
+    // wait for the changes to apply
+    await page.waitForChanges();
+
+    // make sure the property was updated
+    const checkedValue2 = await toggle.getProperty('checked');
+    expect(checkedValue2).toBe(false);
 
     // toggle should not be checked
     expect(toggle).not.toHaveClass('toggle-checked');
 
-    // set checked
-    await toggle.setProperty('checked', true);
+    // we should have received the event two times now
+    expect(ionChange).toHaveReceivedEventTimes(2);
 
-    await page.waitForChanges();
-
-    const checkedValue = await toggle.getProperty('checked');
-    expect(checkedValue).toBe(true);
-
-    // toggle should be checked
-    expect(toggle).toHaveClass('toggle-checked');
-
-
-    // expect(ionChange).toHaveBeenCalledWith({
-    //   checked: true,
-    //   value: 'on'
-    // });
-
-    // // set unchecked
-    // el.checked = false;
-    // await win.flush();
-
-    // // toggle should not be checked
-    // testChecked(el, false);
-    // expect(ionChange).toHaveBeenCalledTimes(2);
-    // expect(ionChange).toHaveBeenCalledWith({
-    //   checked: false,
-    //   value: 'on'
-    // });
+    // make sure we received the correct event detail
+    expect(ionChange).toHaveReceivedEventDetail({
+      checked: false,
+      value: 'on'
+    });
   });
 
 //   it('should create checked standalone', async () => {
