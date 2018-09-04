@@ -2,7 +2,7 @@ import { newE2EPage } from '@stencil/core/testing';
 
 describe('toggle', () => {
 
-  it('should create standalone', async () => {
+  it('should create standalone, unchecked by default', async () => {
     // create a new e2e test page
     const page = await newE2EPage();
 
@@ -25,7 +25,7 @@ describe('toggle', () => {
     expect(toggle).not.toHaveClass('toggle-checked');
 
     // set checked property
-    await toggle.setProperty('checked', true);
+    toggle.setProperty('checked', true);
 
     // wait for the changes to apply
     await page.waitForChanges();
@@ -66,82 +66,94 @@ describe('toggle', () => {
     });
   });
 
-//   it('should create checked standalone', async () => {
-//     const win = new MockWindow();
-//     const el = await win.load({
-//       components: [Toggle],
-//       html: '<ion-toggle checked></ion-toggle>'
-//     }) as HTMLIonToggleElement;
+  it('should create standalone, checked by default', async () => {
+    const page = await newE2EPage({ html: `
+      <ion-toggle checked></ion-toggle>
+    `});
 
-//     const ionChange = spyOnEvent(el, 'ionChange');
+    // find the elemnt in the page
+    const toggle = await page.find('ion-toggle');
 
-//     // toggle should not be checked
-//     testChecked(el, true);
+    // spy on the ionChange event
+    const ionChange = await page.spyOnEvent('ionChange');
 
-//     // set checked
-//     el.checked = true;
-//     await win.flush();
+    // find the hidden input in the light dom
+    const hiddenInput = await page.find('ion-toggle input[type=hidden]');
 
-//     testChecked(el, true);
-//     expect(ionChange).not.toHaveBeenCalled();
+    // hidden input property should have value
+    expect(hiddenInput).toEqualAttribute('value', 'on');
 
-//     // set checked
-//     el.checked = false;
-//     await win.flush();
+    // hidden in put should have aux-input class
+    expect(hiddenInput).toHaveClass('aux-input');
 
-//     // toggle should not be checked
-//     testChecked(el, false);
-//     expect(ionChange).toHaveBeenCalledTimes(1);
-//     expect(ionChange).toHaveBeenCalledWith({
-//       checked: false,
-//       value: 'on'
-//     });
-//   });
+    // find the checkbox input in the shadow dom
+    const checkboxInput = await page.find('ion-toggle >>> input[type=checkbox]');
 
-//   it('should pass properties down to <input>', async () => {
-//     const win = new MockWindow();
-//     const el = await win.load({
-//       components: [Toggle],
-//       html: '<ion-toggle disabled checked value="coding" name="primary"></ion-toggle>'
-//     }) as HTMLIonToggleElement;
+    // checkbox input should have value on
+    expect(checkboxInput).toEqualAttribute('value', 'on');
 
-//     expect(el.disabled).toBe(true);
-//     expect(el.checked).toBe(true);
-//     expect(el.value).toBe('coding');
-//     expect(el.name).toBe('primary');
+    // checkbox input should have checked property true
+    const checkedValue = await checkboxInput.getProperty('checked');
+    expect(checkedValue).toBe(true);
 
-//     const input = getInput(el);
-//     expect(input).toHaveProperties({
-//       disabled: true,
-//       checked: true,
-//       value: 'coding',
-//       name: 'primary'
-//     });
+    // set checked true again, no actual change
+    await toggle.setProperty('checked', true);
 
-//     el.disabled = false;
-//     el.checked = false;
-//     el.value = 'design';
-//     el.name = 'secondary';
+    // wait for the changes to apply
+    await page.waitForChanges();
 
-//     await win.flush();
-//     expect(input.disabled).toBe(false);
-//     expect(input.checked).toBe(false);
-//     expect(input.value).toBe('design');
-//     expect(input.name).toBe('secondary');
-//   });
+    // shouldn't have fired the ionChange event cuz it didn't change
+    expect(ionChange).not.toHaveReceivedEvent();
+
+    // uncheck
+    toggle.setProperty('checked', false);
+
+    // wait for the changes to apply
+    await page.waitForChanges();
+
+    // toggle should not be checked
+    const checkedValue2 = await toggle.getProperty('checked');
+    expect(checkedValue2).toBe(false);
+
+    // hidden input property should no value
+    expect(hiddenInput).toEqualAttribute('value', '');
+
+    expect(ionChange).toHaveReceivedEventTimes(1);
+
+    expect(ionChange).toHaveReceivedEventDetail({
+      checked: false,
+      value: 'on'
+    });
+  });
+
+  it('should pass properties down to hidden input', async () => {
+    const page = await newE2EPage({ html: `
+      <ion-toggle disabled checked value="coding" name="primary"></ion-toggle>
+    `});
+
+    const toggle = await page.find('ion-toggle');
+
+    expect(await toggle.getProperty('disabled')).toBe(true);
+    expect(await toggle.getProperty('checked')).toBe(true);
+    expect(await toggle.getProperty('value')).toBe('coding');
+    expect(await toggle.getProperty('name')).toBe('primary');
+
+    const hiddenInput = await page.find('ion-toggle input[type=hidden]');
+
+    expect(await hiddenInput.getProperty('disabled')).toBe(true);
+    expect(await hiddenInput.getProperty('value')).toBe('coding');
+    expect(await hiddenInput.getProperty('name')).toBe('primary');
+
+    toggle.setProperty('disabled', false);
+    toggle.setProperty('checked', false);
+    toggle.setProperty('value', 'design');
+    toggle.setProperty('name', 'secondary');
+
+    await page.waitForChanges();
+
+    expect(await hiddenInput.getProperty('disabled')).toBe(false);
+    expect(await hiddenInput.getProperty('value')).toBe('');
+    expect(await hiddenInput.getProperty('name')).toBe('secondary');
+  });
+
 });
-
-function testChecked(el: HTMLIonToggleElement, shouldBeChecked: boolean) {
-  const input = getInput(el);
-  expect(el.checked).toBe(shouldBeChecked);
-  expect(input.checked).toBe(shouldBeChecked);
-  if (shouldBeChecked) {
-    expect(el).toHaveClasses(['toggle-checked']);
-  } else {
-    expect(el).not.toHaveClasses(['toggle-checked']);
-  }
-}
-
-function getInput(el: HTMLElement): HTMLInputElement {
-  return el.querySelector('input')!;
-}
