@@ -1,6 +1,6 @@
 import { BackButtonEvent } from '../interface';
 
-type Handler = () => Promise<void> | void;
+type Handler = () => Promise<any> | void;
 
 interface HandlerRegister {
   priority: number;
@@ -36,6 +36,7 @@ export function startHardwareBackButton(win: Window) {
       });
       const result = handler!();
       if (result) {
+        // tslint:disable-next-line:no-floating-promises
         result.then(() => busy = false);
       }
     }
