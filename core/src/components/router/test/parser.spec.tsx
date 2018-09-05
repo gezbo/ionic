@@ -1,4 +1,4 @@
-import { MockWindow } from '@stencil/core/testing';
+import { mockWindow } from '@stencil/core/testing';
 
 import { RouteRedirect, RouteTree } from '../utils/interface';
 import { flattenRouterTree, readRedirects, readRouteNodes } from '../utils/parser';
@@ -87,7 +87,7 @@ describe('parser', () => {
 
   let win: Window;
   beforeEach(() => {
-    win = new MockWindow();
+    win = mockWindow();
   });
 });
 
